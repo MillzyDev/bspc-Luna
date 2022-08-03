@@ -32,5 +32,36 @@ namespace Luna.Configuration
             IPALogLevel.Critical 
         };
        
+
+        public static PluginConfig Load()
+        {
+            if (!File.Exists(ConfigPath))
+            {
+                var pluginConfig = new PluginConfig();
+
+                using (var file = File.CreateText(ConfigPath))
+                {
+                    string text = JsonConvert.SerializeObject(pluginConfig, Formatting.Indented);
+
+                    file.Write(text);
+                    return pluginConfig;
+                }
+            }
+
+            string json = File.ReadAllText(ConfigPath);
+
+
+            return JsonConvert.DeserializeObject<PluginConfig>(json);
+        }
+
+        public void Save()
+        {
+            using (var file = File.CreateText(ConfigPath))
+            {
+                string text = JsonConvert.SerializeObject(this, Formatting.Indented);
+
+                file.Write(text);
+            }
+        }
     }
 }
