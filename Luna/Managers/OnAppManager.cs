@@ -1,17 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Luna.Logging;
 using Zenject;
 
 namespace Luna.Managers
 {
     internal class OnAppManager : IInitializable
     {
+#pragma warning disable CS0649
+        [Inject]
+        private readonly Logger _logger;
+#pragma warning restore CS0649
+
         public void Initialize()
         {
-            throw new NotImplementedException();
+            _logger.Info("OnApp is workey");
         }
     }
 }
