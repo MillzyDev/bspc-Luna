@@ -3,22 +3,11 @@ using System.IO;
 using System.Reflection;
 using IPALogLevel = IPA.Logging.Logger.Level;
 
-namespace Luna.Configuration
-{
+namespace Luna.Configuration { 
+    // I made this because arrays and lists with the default BSIPA config system were not working, then I found out I needed to use [UseConverter]...
+    // but I'd already done this before I found out, and I cba to change it again.
     internal class PluginConfig
     {
-        private static string configPath;
-        public static string ConfigPath
-        {
-            get
-            {
-                if (configPath == null || configPath == string.Empty)
-                    configPath = Path.Combine(Path.GetFullPath("./"), "UserData", $"{Assembly.GetExecutingAssembly().GetName().Name}.json");
-
-                return configPath;
-            }
-        }
-
         [JsonProperty("enabled")]
         public bool Enabled { get; set; } = true;
 
@@ -31,7 +20,19 @@ namespace Luna.Configuration
             IPALogLevel.Error, 
             IPALogLevel.Critical 
         };
-       
+
+#region Not-Config
+        private static string configPath;
+        public static string ConfigPath
+        {
+            get
+            {
+                if (configPath == null || configPath == string.Empty)
+                    configPath = Path.Combine(Path.GetFullPath("./"), "UserData", $"{Assembly.GetExecutingAssembly().GetName().Name}.json");
+
+                return configPath;
+            }
+        }
 
         public static PluginConfig Load()
         {
@@ -63,5 +64,6 @@ namespace Luna.Configuration
                 file.Write(text);
             }
         }
+#endregion
     }
 }
