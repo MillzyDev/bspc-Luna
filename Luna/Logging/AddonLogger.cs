@@ -6,14 +6,14 @@ using IPALogger = IPA.Logging.Logger;
 
 namespace Luna.Logging
 {
-    internal class Logger : IPALogger
+    internal class AddonLogger : IPALogger
     {
-        private static readonly Lazy<Logger> s_lazy = new Lazy<Logger>(() => new Logger());
+        private static readonly Lazy<AddonLogger> s_lazy = new Lazy<AddonLogger>(() => new AddonLogger());
 
         private readonly PluginConfig _config;
         private readonly IPALogger _base;
 
-        private Logger()
+        private AddonLogger()
         {
             _config = Plugin.Instance.Config;
             _base = Plugin.Instance.VanillaLogger;
