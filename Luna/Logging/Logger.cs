@@ -6,18 +6,26 @@ using IPALogger = IPA.Logging.Logger;
 
 namespace Luna.Logging
 {
-    internal class Logger : IPALogger, IInitializable
+    internal class Logger : IPALogger
     {
-        private readonly PluginConfig _config;
+        private static readonly Lazy<Logger> s_lazy = new Lazy<Logger>(() => new Logger());
 
-        public void Initialize()
+        private readonly PluginConfig _config;
+        private readonly IPALogger _base;
+
+        private Logger()
         {
-            throw new NotImplementedException();
+            _config = Plugin.Instance.Config;
+            _base = Plugin.Instance.VanillaLogger;
         }
+
+        public static void BindToContainer(DiContainer container) 
+            => container.BindInstance(s_lazy.Value); 
 
         public override void Log(Level level, string message)
         {
-            throw new NotImplementedException();
+            if (_config.AllowedLogLevels.IndexOf(level) == -1) return;
+            _base.Log(level, message);
         }
     }
 }
