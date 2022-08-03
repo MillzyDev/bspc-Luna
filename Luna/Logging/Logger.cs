@@ -20,7 +20,7 @@ namespace Luna.Logging
         }
 
         public static void BindToContainer(DiContainer container) 
-            => container.BindInstance(s_lazy.Value); 
+            => container.BindInstance(s_lazy.Value).AsSingle(); 
 
         public override void Log(Level level, string message)
         {
