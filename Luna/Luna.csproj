@@ -103,13 +103,18 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="Newtonsoft.Json">
-	  <HintPath>$(BeatSaberDir)\Libs\Newtonsoft.Json.dll</HintPath>
-	  <Private>False</Private>
+      <HintPath>$(BeatSaberDir)\Libs\Newtonsoft.Json.dll</HintPath>
+      <Private>False</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="Loader\Addon.cs" />
+    <Compile Include="Loader\AddonCollection.cs" />
+    <Compile Include="Loader\AddonMetadata.cs" />
+    <Compile Include="Loader\Chainloader.cs" />
     <Compile Include="Installers\AppInstaller.cs" />
-    <Compile Include="Logging\Logger.cs" />
+    <Compile Include="Logging\AddonLogger.cs" />
     <Compile Include="Managers\OnAppManager.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Configuration\PluginConfig.cs" />
@@ -127,6 +132,9 @@
       <Version>2.0.0-beta1</Version>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="NLua">
+      <Version>1.6.0</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup />
