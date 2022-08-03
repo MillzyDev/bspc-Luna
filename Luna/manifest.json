@@ -1,0 +1,12 @@
+﻿{
+  "$schema": "https://raw.githubusercontent.com/bsmg/BSIPA-MetadataFileSchema/master/Schema.json",
+  "id": "Luna",
+  "name": "Luna",
+  "author": "Millzy",
+  "version": "1.0.0",
+  "description": "Luna is a Beat Saber modding framework that allows the invocation and execution of \"addons\" that are written in Lua.",
+  "gameVersion": "1.21.0",
+  "dependsOn": {
+    "BSIPA": "^4.2.0"
+  }
+}
