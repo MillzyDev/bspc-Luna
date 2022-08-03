@@ -1,12 +1,9 @@
 ﻿using IPA;
 using IPA.Config;
 using IPA.Config.Stores;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
-using UnityEngine.SceneManagement;
+using Luna.Configuration;
+using Luna.Installers;
+using SiraUtil.Zenject;
 using IPALogger = IPA.Logging.Logger;
 
 namespace Luna
@@ -16,22 +13,23 @@ namespace Luna
     {
         internal static Plugin Instance { get; private set; }
 
+        internal IPALogger VanillaLogger { get; private set; }
+        internal PluginConfig Config { get; private set; }
+
         [Init]
-        public void Init(IPALogger logger)
+        public void Init(IPALogger logger, Config config, Zenjector zenjector)
         {
             Instance = this;
-        }
+            VanillaLogger = logger;
+            Config = config.Generated<PluginConfig>();
 
-        [OnStart]
-        public void OnApplicationStart()
-        {
+            zenjector.UseLogger(logger);
 
-        }
+            #region Install Installers
 
-        [OnExit]
-        public void OnApplicationQuit()
-        {
+            zenjector.Install<AppInstaller>(Location.App);
 
+            #endregion
         }
     }
 }
