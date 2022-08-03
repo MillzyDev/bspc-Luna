@@ -102,6 +102,10 @@
       <HintPath>$(BeatSaberDir)\Plugins\SiraUtil.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Newtonsoft.Json">
+	  <HintPath>$(BeatSaberDir)\Libs\Newtonsoft.Json.dll</HintPath>
+	  <Private>False</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Installers\AppInstaller.cs" />
