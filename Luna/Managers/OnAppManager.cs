@@ -5,10 +5,8 @@ namespace Luna.Managers
 {
     internal class OnAppManager : IInitializable
     {
-#pragma warning disable CS0649
         [Inject]
-        private readonly Logger _logger;
-#pragma warning restore CS0649
+        private readonly AddonLogger _logger;
 
         public void Initialize()
         {
