@@ -11,6 +11,8 @@ namespace Luna.Configuration {
         [JsonProperty("enabled")]
         public bool Enabled { get; set; } = true;
 
+        [JsonProperty("enableLogging")]
+        public bool EnableLogging { get; set; } = true;
 
         [JsonProperty("allowedLogLevels")]
         public IPALogLevel[] AllowedLogLevels { get; set; } = 
