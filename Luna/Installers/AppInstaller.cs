@@ -10,7 +10,7 @@ namespace Luna.Installers
     {
         public override void InstallBindings()
         {
-            Logger.BindToContainer(Container);
+            AddonLogger.BindToContainer(Container);
 
             Container.BindInterfacesAndSelfTo<OnAppManager>().AsSingle();
         }
