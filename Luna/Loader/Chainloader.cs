@@ -12,22 +12,6 @@ namespace Luna.Loader
         private AddonCollection addons = new AddonCollection();
         private List<LoaderException> loaderErrors = new List<LoaderException>();
 
-        #region Entrypoints
-        private AddonCollection onApp = new AddonCollection();
-        private AddonCollection onMenu = new AddonCollection();
-        private AddonCollection onStandardPlayer = new AddonCollection();
-        private AddonCollection onCampaignPlayer = new AddonCollection();
-        private AddonCollection onMultiPlayer = new AddonCollection();
-        private AddonCollection onPlayer = new AddonCollection();
-        private AddonCollection onTutorial = new AddonCollection();
-        private AddonCollection onSinglePlayer = new AddonCollection();
-        private AddonCollection onGameCore = new AddonCollection();
-        private AddonCollection onMultiPlayerCore = new AddonCollection();
-        private AddonCollection onConnectedPlayer = new AddonCollection();
-        private AddonCollection onAlwaysMultiPlayer = new AddonCollection();
-        private AddonCollection onInactiveMultiPlayer = new AddonCollection();
-        #endregion
-
         private Chainloader() { }
 
         public static Chainloader Instance => _lazy.Value;
@@ -40,26 +24,24 @@ namespace Luna.Loader
         public AddonCollection Addons { get => addons; set => addons = value; }
         public List<LoaderException> LoaderErrors { get => loaderErrors; protected internal set => loaderErrors = value; }
 
-        /// <summary>
-        /// If this is true, the Chainloader will not accept any new addons to be loaded.
-        /// </summary>
-        public bool ReadyForExecution { get; protected internal set; }
-
         #region Entrypoints
-        public AddonCollection OnApp { get => onApp; protected internal set => onApp = value; }
-        public AddonCollection OnMenu { get => onMenu; protected internal set => onMenu = value; }
-        public AddonCollection OnStandardPlayer { get => onStandardPlayer; protected internal set => onStandardPlayer = value; }
-        public AddonCollection OnCampaignPlayer { get => onCampaignPlayer; protected internal set => onCampaignPlayer = value; }
-        public AddonCollection OnMultiPlayer { get => onMultiPlayer; protected internal set => onMultiPlayer = value; }
-        public AddonCollection OnPlayer { get => onPlayer; protected internal set => onPlayer = value; }
-        public AddonCollection OnTutorial { get => onTutorial; protected internal set => onTutorial = value; }
-        public AddonCollection OnSinglePlayer { get => onSinglePlayer; protected internal set => onSinglePlayer = value; }
-        public AddonCollection OnGameCore { get => onGameCore; protected internal set => onGameCore = value; }
-        public AddonCollection OnMultiPlayerCore { get => onMultiPlayerCore; protected internal set => onMultiPlayerCore = value; }
-        public AddonCollection OnConnectedPlayer { get => onConnectedPlayer; protected internal set => onConnectedPlayer = value; }
-        public AddonCollection OnAlwaysMultiPlayer { get => onAlwaysMultiPlayer; protected internal set => onAlwaysMultiPlayer = value; }
-        public AddonCollection OnInactiveMultiPlayer { get => onInactiveMultiPlayer; protected internal set => onInactiveMultiPlayer = value; }
+        public AddonCollection OnApp { get; protected internal set; } = new AddonCollection();
+        public AddonCollection OnMenu { get; protected internal set; } = new AddonCollection();
+        public AddonCollection OnStandardPlayer { get; protected internal set; } = new AddonCollection();
+        public AddonCollection OnCampaignPlayer { get; protected internal set; } = new AddonCollection();
+        public AddonCollection OnMultiPlayer { get; protected internal set; } = new AddonCollection();
+        public AddonCollection OnPlayer { get; protected internal set; } = new AddonCollection();
+        public AddonCollection OnTutorial { get; protected internal set; } = new AddonCollection();
+        public AddonCollection OnSinglePlayer { get; protected internal set; } = new AddonCollection();
+        public AddonCollection OnGameCore { get; protected internal set; } = new AddonCollection();
+        public AddonCollection OnMultiPlayerCore { get; protected internal set; } = new AddonCollection();
+        public AddonCollection OnConnectedPlayer { get; protected internal set; } = new AddonCollection();
+        public AddonCollection OnAlwaysMultiPlayer { get; protected internal set; } = new AddonCollection();
+        public AddonCollection OnInactiveMultiPlayer { get; protected internal set; } = new AddonCollection();
         #endregion
+
+        public Dictionary<string, object> RegisteredModules { get; protected internal set; } = new Dictionary<string, object>();
+        public Dictionary<string, object> LoadedModules { get; protected internal set; } = new Dictionary<string, object>();
 
         /// <summary>
         /// Loads a singular lua or luac addon from a path.
@@ -67,19 +49,12 @@ namespace Luna.Loader
         /// <param name="path">Path of the file, including the file name.</param>
         public void LoadAddon(string path)
         {
-            Plugin.Instance.VanillaLogger.Info($"Attempting to load Addon at {path}");
+            Plugin.Logger.Info($"Attempting to load Addon at {path}");
 
             try
             {
-                if (ReadyForExecution) throw new LoaderException("Attempted to load an addon too late.");
-
                 Lua state = new Lua();
                 state.DoFile(path);
-
-                foreach (var g in state.Globals)
-                {
-                    Plugin.Instance.VanillaLogger.Info(g);
-                }
                      
                 var metadata = state.GetTable("ADDON_METADATA");
 
@@ -109,14 +84,30 @@ namespace Luna.Loader
 
                 Addons += addon;
 
-                Plugin.Instance.VanillaLogger.Info($"Successfully loaded Addon: {addonMetadata.Name} - {addonMetadata.Version} by {addonMetadata.Author}!");
+                #region Register Entrypoints
+                if (state.GetFunction("onApp") != null) OnApp += addon;
+                if (state.GetFunction("onMenu") != null) OnMenu += addon;
+                if (state.GetFunction("onStandardPlayer") != null) OnStandardPlayer += addon;
+                if (state.GetFunction("onCampaignPlayer") != null) OnCampaignPlayer += addon;
+                if (state.GetFunction("onMultiPlayer") != null) OnMultiPlayer += addon;
+                if (state.GetFunction("onPlayer") != null) OnPlayer += addon;
+                if (state.GetFunction("onTutorial") != null) OnTutorial += addon;
+                if (state.GetFunction("onSinglePlayer") != null) OnSinglePlayer += addon;
+                if (state.GetFunction("onGameCore") != null) OnGameCore += addon;
+                if (state.GetFunction("onMultiPlayerCore") != null) OnMultiPlayerCore += addon;
+                if (state.GetFunction("onConnectedPlayer") != null) OnConnectedPlayer += addon;
+                if (state.GetFunction("onAlwaysMultiPlayer") != null) OnAlwaysMultiPlayer += addon;
+                if (state.GetFunction("onInactiveMultiPlayer") != null) OnInactiveMultiPlayer += addon;
+                #endregion
+
+                Plugin.Logger.Info($"Successfully loaded Addon: {addonMetadata.Name} - {addonMetadata.Version} by {addonMetadata.Author}!");
 
                 state.Close();
             }
             catch (LoaderException e)
             {
-                Plugin.Instance.VanillaLogger.Error($"Unable to load addon at {path}.");
-                Plugin.Instance.VanillaLogger.Error(e);
+                Plugin.Logger.Error($"Unable to load addon at {path}.");
+                Plugin.Logger.Error(e);
             } 
         }
 
@@ -138,19 +129,20 @@ namespace Luna.Loader
         /// Registers an action to be run when the lua <c>loadModule</c> function is used.
         /// </summary>
         /// <param name="name">The name of the module that will be used in the lua <c>loadModule</c> function and will be used to access your module</param>
-        /// <param name="onLoad">An action that will run when <c>loadModule(<paramref name="name"/>)</c> is invoked by an addon.</param>
-        /// <param name="onUnload">An action that will run once the execution of an entrypoint has concluded.</param>
-        public void RegisterModule(string name, Action<Lua> onLoad, Action onUnload = null)
-        {
-
-        }
+        /// <param name="module">An object that cont</param>
+        public void RegisterModule<T>(string name) where T : LunaModule, new()
+            => RegisteredModules.Add(name, new T());
 
         /// <summary>
-        /// Forces a module that registered under a name to be loaded when a new state is created.
+        /// Forces a module that registered under a name to be loaded within the provided state
         /// </summary>
-        /// <param name="name"></param>
-        public void ForceLoadModule(string name)
+        /// <param name="name">Name of the module</param>
+        /// <param name="state">The active Lua state that the module will be loaded into</param>
+        public void ForceLoadModule(Lua state, string name)
         {
+            object module = RegisteredModules[name];
+            var methods = module.GetType().GetMethods();
+
 
         }
     }
