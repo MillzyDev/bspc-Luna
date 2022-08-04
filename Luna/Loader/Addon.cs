@@ -5,11 +5,10 @@
         private string _path;
         private AddonMetadata _metadata;
 
-        public Addon(string path)
+        public Addon(string path, AddonMetadata metadata)
         {
             _path = path;
-            // TODO: Load Metadata
-            _metadata = null;
+            _metadata = metadata;
         }
 
         public string Path { get => _path; }
