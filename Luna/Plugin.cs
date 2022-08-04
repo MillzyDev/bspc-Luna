@@ -1,4 +1,6 @@
 ﻿using IPA;
+using IPA.Config;
+using IPA.Config.Stores;
 using Luna.Configuration;
 using Luna.Installers;
 using Luna.Loader;
@@ -13,17 +15,18 @@ namespace Luna
     {
         internal static Plugin Instance { get; private set; }
 
-        internal IPALogger VanillaLogger { get; private set; }
+        internal IPALogger _Logger { get; private set; }
+        internal static IPALogger Logger => Instance._Logger;
+
         internal PluginConfig Config { get; private set; }
 
         [Init]
-        public void Init(IPALogger logger, Zenjector zenjector)
+        public void Init(IPALogger logger, Config config, Zenjector zenjector)
         {
             Instance = this;
-            VanillaLogger = logger;
+            _Logger = logger;
 
-            Config = PluginConfig.Load();
-            Config.Save(); // making sure
+            Config = config.Generated<PluginConfig>();
 
             zenjector.UseLogger(logger);
 
@@ -37,7 +40,7 @@ namespace Luna
         [OnStart]
         public void OnStart()
         {
-            VanillaLogger.Info("Loading addons...");
+            _Logger.Info("Loading addons...");
             Chainloader.Instance.LoadAddons(Chainloader.AddonsDirectoryPath);
         }
     }
