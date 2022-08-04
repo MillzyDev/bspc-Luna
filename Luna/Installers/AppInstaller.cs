@@ -1,8 +1,6 @@
-﻿using Luna.Configuration;
-using Luna.Logging;
-using Luna.Managers;
+﻿using Luna.Managers;
+using NLua;
 using Zenject;
-using IPALogger = IPA.Logging.Logger;
 
 namespace Luna.Installers
 {
@@ -10,8 +8,7 @@ namespace Luna.Installers
     {
         public override void InstallBindings()
         {
-            AddonLogger.BindToContainer(Container);
-
+            Container.BindInstance(new Lua()).AsSingle();
             Container.BindInterfacesAndSelfTo<OnAppManager>().AsSingle();
         }
     }
