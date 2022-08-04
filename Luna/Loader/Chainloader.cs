@@ -1,16 +1,13 @@
-﻿using Luna.Loader;
-using ModestTree;
-using NLua;
+﻿using NLua;
 using System;
 using System.Collections.Generic;
+using System.IO;
 
-namespace Luna
+namespace Luna.Loader
 {
     public class Chainloader
     {
         private static readonly Lazy<Chainloader> _lazy = new Lazy<Chainloader>(() => new Chainloader());
-
-        private bool hasLoaded;
 
         private AddonCollection addons = new AddonCollection();
         private List<LoaderException> loaderErrors = new List<LoaderException>();
@@ -35,10 +32,18 @@ namespace Luna
 
         public static Chainloader Instance => _lazy.Value;
 
-        public bool HasLoaded { get => hasLoaded; }
+        public static string AddonsDirectoryPath 
+        { 
+            get => Path.Combine(Path.GetFullPath("./"), "UserData", "Luna", "Addons");
+        }
 
         public AddonCollection Addons { get => addons; set => addons = value; }
         public List<LoaderException> LoaderErrors { get => loaderErrors; protected internal set => loaderErrors = value; }
+
+        /// <summary>
+        /// If this is true, the Chainloader will not accept any new addons to be loaded.
+        /// </summary>
+        public bool ReadyForExecution { get; protected internal set; }
 
         #region Entrypoints
         public AddonCollection OnApp { get => onApp; protected internal set => onApp = value; }
@@ -62,16 +67,21 @@ namespace Luna
         /// <param name="path">Path of the file, including the file name.</param>
         public void LoadAddon(string path)
         {
+            Plugin.Instance.VanillaLogger.Info($"Attempting to load Addon at {path}");
+
             try
             {
-                Lua state = new Lua();
-                state.LoadFile(path);
+                if (ReadyForExecution) throw new LoaderException("Attempted to load an addon too late.");
 
-                var metadata = state.GetTable("ADDON_METADATA");
-                if (metadata == null)
+                Lua state = new Lua();
+                state.DoFile(path);
+
+                foreach (var g in state.Globals)
                 {
-                    throw new LoaderException($"Metadata for addon at {path} does not exist.");
+                    Plugin.Instance.VanillaLogger.Info(g);
                 }
+                     
+                var metadata = state.GetTable("ADDON_METADATA");
 
                 string lunaVersion = metadata["_lunaVersion"] as string;
                 string name = metadata["name"] as string;
@@ -84,7 +94,7 @@ namespace Luna
                     || string.IsNullOrEmpty(description)
                     || string.IsNullOrEmpty(version)
                     || string.IsNullOrEmpty(author)
-                    ) throw new LoaderException($"Metadata for addon at {path} is invalid. Some entries null or empty");
+                    ) throw new LoaderException($"Metadata for addon at {path} is invalid.");
 
                 var addonMetadata = new AddonMetadata
                 {
@@ -98,6 +108,8 @@ namespace Luna
                 var addon = new Addon(path, addonMetadata);
 
                 Addons += addon;
+
+                Plugin.Instance.VanillaLogger.Info($"Successfully loaded Addon: {addonMetadata.Name} - {addonMetadata.Version} by {addonMetadata.Author}!");
 
                 state.Close();
             }
@@ -114,7 +126,12 @@ namespace Luna
         /// <param name="path">Path to the directory that contains the addon files.</param>
         public void LoadAddons(string path)
         {
+            DirectoryInfo dir = new DirectoryInfo(path);
 
+            foreach (FileInfo file in dir.GetFiles())
+            {
+                LoadAddon(file.FullName);
+            }
         }
 
         /// <summary>
@@ -124,6 +141,15 @@ namespace Luna
         /// <param name="onLoad">An action that will run when <c>loadModule(<paramref name="name"/>)</c> is invoked by an addon.</param>
         /// <param name="onUnload">An action that will run once the execution of an entrypoint has concluded.</param>
         public void RegisterModule(string name, Action<Lua> onLoad, Action onUnload = null)
+        {
+
+        }
+
+        /// <summary>
+        /// Forces a module that registered under a name to be loaded when a new state is created.
+        /// </summary>
+        /// <param name="name"></param>
+        public void ForceLoadModule(string name)
         {
 
         }
