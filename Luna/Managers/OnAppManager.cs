@@ -1,16 +1,23 @@
-﻿using Luna.Logging;
+﻿using Luna.Loader;
+using NLua;
+using System;
 using Zenject;
 
 namespace Luna.Managers
 {
-    internal class OnAppManager : IInitializable
+    internal class OnAppManager : IInitializable, IDisposable
     {
         [Inject]
-        private readonly AddonLogger _logger;
+        private readonly Lua lua;
 
         public void Initialize()
         {
-            _logger.Info("OnApp is workey");
+
+        }
+
+        public void Dispose()
+        {
+            throw new NotImplementedException();
         }
     }
 }
