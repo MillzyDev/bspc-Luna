@@ -114,6 +114,7 @@
     <Compile Include="Loader\AddonMetadata.cs" />
     <Compile Include="Loader\Chainloader.cs" />
     <Compile Include="Installers\AppInstaller.cs" />
+    <Compile Include="Loader\LoaderException.cs" />
     <Compile Include="Logging\AddonLogger.cs" />
     <Compile Include="Managers\OnAppManager.cs" />
     <Compile Include="Plugin.cs" />
