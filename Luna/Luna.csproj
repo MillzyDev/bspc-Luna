@@ -37,7 +37,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(NCrunch)' == '1'">
     <DisableCopyToPlugins>True</DisableCopyToPlugins>
-    <DisableZipRelease>True</DisableZipRelease>
+    <DisableZipRelease>False</DisableZipRelease>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -115,8 +115,9 @@
     <Compile Include="Loader\Chainloader.cs" />
     <Compile Include="Installers\AppInstaller.cs" />
     <Compile Include="Loader\LoaderException.cs" />
-    <Compile Include="Logging\AddonLogger.cs" />
+    <Compile Include="StandardLibrary\Luna.cs" />
     <Compile Include="Managers\OnAppManager.cs" />
+    <Compile Include="Loader\LunaModule.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Configuration\PluginConfig.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
