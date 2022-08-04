@@ -1,4 +1,5 @@
 ﻿using Luna.Loader;
+using ModestTree;
 using NLua;
 using System;
 using System.Collections.Generic;
@@ -12,22 +13,22 @@ namespace Luna
         private bool hasLoaded;
 
         private AddonCollection addons = new AddonCollection();
-        private List<string> loaderErrors;
+        private List<LoaderException> loaderErrors = new List<LoaderException>();
 
         #region Entrypoints
-        private AddonCollection onApp;
-        private AddonCollection onMenu;
-        private AddonCollection onStandardPlayer;
-        private AddonCollection onCampaignPlayer;
-        private AddonCollection onMultiPlayer;
-        private AddonCollection onPlayer;
-        private AddonCollection onTutorial;
-        private AddonCollection onSinglePlayer;
-        private AddonCollection onGameCore;
-        private AddonCollection onMultiPlayerCore;
-        private AddonCollection onConnectedPlayer;
-        private AddonCollection onAlwaysMultiPlayer;
-        private AddonCollection onInactiveMultiPlayer;
+        private AddonCollection onApp = new AddonCollection();
+        private AddonCollection onMenu = new AddonCollection();
+        private AddonCollection onStandardPlayer = new AddonCollection();
+        private AddonCollection onCampaignPlayer = new AddonCollection();
+        private AddonCollection onMultiPlayer = new AddonCollection();
+        private AddonCollection onPlayer = new AddonCollection();
+        private AddonCollection onTutorial = new AddonCollection();
+        private AddonCollection onSinglePlayer = new AddonCollection();
+        private AddonCollection onGameCore = new AddonCollection();
+        private AddonCollection onMultiPlayerCore = new AddonCollection();
+        private AddonCollection onConnectedPlayer = new AddonCollection();
+        private AddonCollection onAlwaysMultiPlayer = new AddonCollection();
+        private AddonCollection onInactiveMultiPlayer = new AddonCollection();
         #endregion
 
         private Chainloader() { }
@@ -36,23 +37,23 @@ namespace Luna
 
         public bool HasLoaded { get => hasLoaded; }
 
-        public AddonCollection Addons { get => addons; }
-        public List<string> LoaderErrors { get => loaderErrors; }
+        public AddonCollection Addons { get => addons; set => addons = value; }
+        public List<LoaderException> LoaderErrors { get => loaderErrors; protected internal set => loaderErrors = value; }
 
         #region Entrypoints
-        public AddonCollection OnApp { get => onApp; }
-        public AddonCollection OnMenu { get => onMenu; }
-        public AddonCollection OnStandardPlayer { get => onStandardPlayer; }
-        public AddonCollection OnCampaignPlayer { get => onCampaignPlayer; }
-        public AddonCollection OnMultiPlayer { get => onMultiPlayer; }
-        public AddonCollection OnPlayer { get => onPlayer; }
-        public AddonCollection OnTutorial { get => onTutorial; }
-        public AddonCollection OnSinglePlayer { get => onSinglePlayer; }
-        public AddonCollection OnGameCore { get => onGameCore; }
-        public AddonCollection OnMultiPlayerCore { get => onMultiPlayerCore; }
-        public AddonCollection OnConnectedPlayer { get => onConnectedPlayer; }
-        public AddonCollection OnAlwaysMultiPlayer { get => onAlwaysMultiPlayer;  }
-        public AddonCollection OnInactiveMultiPlayer { get => onInactiveMultiPlayer; }
+        public AddonCollection OnApp { get => onApp; protected internal set => onApp = value; }
+        public AddonCollection OnMenu { get => onMenu; protected internal set => onMenu = value; }
+        public AddonCollection OnStandardPlayer { get => onStandardPlayer; protected internal set => onStandardPlayer = value; }
+        public AddonCollection OnCampaignPlayer { get => onCampaignPlayer; protected internal set => onCampaignPlayer = value; }
+        public AddonCollection OnMultiPlayer { get => onMultiPlayer; protected internal set => onMultiPlayer = value; }
+        public AddonCollection OnPlayer { get => onPlayer; protected internal set => onPlayer = value; }
+        public AddonCollection OnTutorial { get => onTutorial; protected internal set => onTutorial = value; }
+        public AddonCollection OnSinglePlayer { get => onSinglePlayer; protected internal set => onSinglePlayer = value; }
+        public AddonCollection OnGameCore { get => onGameCore; protected internal set => onGameCore = value; }
+        public AddonCollection OnMultiPlayerCore { get => onMultiPlayerCore; protected internal set => onMultiPlayerCore = value; }
+        public AddonCollection OnConnectedPlayer { get => onConnectedPlayer; protected internal set => onConnectedPlayer = value; }
+        public AddonCollection OnAlwaysMultiPlayer { get => onAlwaysMultiPlayer; protected internal set => onAlwaysMultiPlayer = value; }
+        public AddonCollection OnInactiveMultiPlayer { get => onInactiveMultiPlayer; protected internal set => onInactiveMultiPlayer = value; }
         #endregion
 
         /// <summary>
@@ -61,8 +62,50 @@ namespace Luna
         /// <param name="path">Path of the file, including the file name.</param>
         public void LoadAddon(string path)
         {
-            Lua state = new Lua();
-            state.LoadFile(path);
+            try
+            {
+                Lua state = new Lua();
+                state.LoadFile(path);
+
+                var metadata = state.GetTable("ADDON_METADATA");
+                if (metadata == null)
+                {
+                    throw new LoaderException($"Metadata for addon at {path} does not exist.");
+                }
+
+                string lunaVersion = metadata["_lunaVersion"] as string;
+                string name = metadata["name"] as string;
+                string description = metadata["description"] as string;
+                string version = metadata["version"] as string;
+                string author = metadata["author"] as string;
+
+                if (string.IsNullOrEmpty(lunaVersion)
+                    || string.IsNullOrEmpty(name)
+                    || string.IsNullOrEmpty(description)
+                    || string.IsNullOrEmpty(version)
+                    || string.IsNullOrEmpty(author)
+                    ) throw new LoaderException($"Metadata for addon at {path} is invalid. Some entries null or empty");
+
+                var addonMetadata = new AddonMetadata
+                {
+                    _LunaVersion = lunaVersion,
+                    Name = name,
+                    Description = description,
+                    Version = version,
+                    Author = author,
+                };
+
+                var addon = new Addon(path, addonMetadata);
+
+                Addons += addon;
+
+                state.Close();
+            }
+            catch (LoaderException e)
+            {
+                Plugin.Instance.VanillaLogger.Error($"Unable to load addon at {path}.");
+                Plugin.Instance.VanillaLogger.Error(e);
+            } 
         }
 
         /// <summary>
