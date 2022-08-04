@@ -1,7 +1,9 @@
 ﻿using IPA;
 using Luna.Configuration;
 using Luna.Installers;
+using Luna.Loader;
 using SiraUtil.Zenject;
+using System.IO;
 using IPALogger = IPA.Logging.Logger;
 
 namespace Luna
@@ -21,12 +23,22 @@ namespace Luna
             VanillaLogger = logger;
 
             Config = PluginConfig.Load();
+            Config.Save(); // making sure
 
             zenjector.UseLogger(logger);
+
+            Directory.CreateDirectory(Chainloader.AddonsDirectoryPath);
 
             #region Installers
             zenjector.Install<AppInstaller>(Location.App);
             #endregion
+        }
+
+        [OnStart]
+        public void OnStart()
+        {
+            VanillaLogger.Info("Loading addons...");
+            Chainloader.Instance.LoadAddons(Chainloader.AddonsDirectoryPath);
         }
     }
 }
