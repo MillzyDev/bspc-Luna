@@ -115,7 +115,6 @@
     <Compile Include="Loader\Chainloader.cs" />
     <Compile Include="Installers\AppInstaller.cs" />
     <Compile Include="Loader\LoaderException.cs" />
-    <Compile Include="StandardLibrary\Luna.cs" />
     <Compile Include="Managers\OnAppManager.cs" />
     <Compile Include="Loader\LunaModule.cs" />
     <Compile Include="Plugin.cs" />
@@ -139,6 +138,8 @@
       <Version>1.6.0</Version>
     </PackageReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="StandardLibrary\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
