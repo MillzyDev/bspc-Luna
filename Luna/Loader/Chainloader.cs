@@ -125,6 +125,7 @@ namespace Luna.Loader
             }
         }
 
+        /*
         /// <summary>
         /// Registers an action to be run when the lua <c>loadModule</c> function is used.
         /// </summary>
@@ -145,5 +146,6 @@ namespace Luna.Loader
 
 
         }
+        */
     }
 }
